@@ -3,10 +3,12 @@ import axios from 'axios';
 import { Container, Header, List } from 'semantic-ui-react';
 import { Activity } from '../models/activity';
 import NavBar from './NavBar';
+import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
 
 function App() {
 
   const [activities, setActivities] = useState<Activity[]>([])
+  const [selectedActivity, setSelectedActivity] = useState<Activity | undefined>(undefined);
 
   useEffect(() => {
     axios.get<Activity[]>('https://localhost:5001/api/activities').then(response => {
@@ -14,18 +16,25 @@ function App() {
     })
   }, [])
 
+  function handleSelectedActivity(id: string){
+    setSelectedActivity(activities.find(x=>x.id === id))
+  }
+
+  function handleCancleSelectActivity(){
+    setSelectedActivity(undefined);
+  }
+
   return (
     <> {/*shortcut version of using Fragment*/}
       <NavBar />
       <Container style={{marginTop: '7em'}}>
-          <List>
-            {activities.map(activity => (
-              <List.Item key={activity.id}>
-                {activity.title}
-              </List.Item>
-            ))}
-          </List>
-        </Container>
+          <ActivityDashboard
+           activities = {activities} 
+           selectedActivity={selectedActivity}
+           selectActivity={handleSelectedActivity}
+           cancelSelectActivity={handleCancleSelectActivity}
+          />
+      </Container>
     </>
   );
 }
