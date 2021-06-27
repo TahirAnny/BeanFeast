@@ -22,9 +22,8 @@ export default class ActivityStore{
                 activity.date = activity.date.split('T')[0];
                 this.activities.push(activity);
             })
-            this.loadingInitial = false;
-            
-            this.setLoadingInitial(true);
+
+            this.setLoadingInitial(false);
         } catch(error){
             console.log(error);
             this.setLoadingInitial(false);
