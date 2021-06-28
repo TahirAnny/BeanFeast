@@ -22,23 +22,6 @@ function App() {
     activityStore.loadActivities();
   }, [activityStore])
 
-  function handleSelectedActivity(id: string){
-    setSelectedActivity(activities.find(x=>x.id === id))
-  }
-
-  function handleCancleSelectActivity(){
-    setSelectedActivity(undefined);
-  }
-
-  function handleFormOpen(id?: string){
-    id ? handleSelectedActivity(id) : handleCancleSelectActivity();
-    setEditMode(true);
-  }
-
-  function handleFormClose(){
-    setEditMode(false);
-  }
-
   function handleCreateOrEditActivity(activity: Activity){
     setSubmitting(true);
     if(activity.id){
@@ -74,16 +57,10 @@ function App() {
 
   return (
     <> {/*shortcut version of using Fragment*/}
-      <NavBar openForm = {handleFormOpen} />
+      <NavBar />
       <Container style={{marginTop: '7em'}}>
           <ActivityDashboard
            activities = {activityStore.activities} 
-           selectedActivity = {selectedActivity}
-           selectActivity = {handleSelectedActivity}
-           cancelSelectActivity = {handleCancleSelectActivity}
-           editMode = {editMode}
-           openForm = {handleFormOpen}
-           closeForm = {handleFormClose}
            createOrEdit = {handleCreateOrEditActivity}
            deleteActivity = {handleDeleteActivity}
            submitting = {submitting}
