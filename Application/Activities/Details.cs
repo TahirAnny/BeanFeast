@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core.Mappings;
 using Domain;
 using Infrastructure;
 using MediatR;
@@ -9,12 +10,12 @@ namespace Application.Activities
 {
     public class Details
     {
-        public class Query : IRequest<Activity>
+        public class Query : IRequest<Result<Activity>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Activity>
+        public class Handler : IRequestHandler<Query, Result<Activity>>
         {
             private readonly ApplicationDbContext _dbContext;
             public Handler(ApplicationDbContext dbContext)
@@ -22,9 +23,11 @@ namespace Application.Activities
                 _dbContext = dbContext;
             }
 
-            public async Task<Activity> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<Activity>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return await _dbContext.Activities.FindAsync(request.Id);
+                var activity = await _dbContext.Activities.FindAsync(request.Id);
+
+                return Result<Activity>.Success(activity);
             }
         }
     }
