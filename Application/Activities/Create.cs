@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core.Mappings;
 using Domain;
 using FluentValidation;
 using Infrastructure;
@@ -9,7 +10,7 @@ namespace Application.Activities
 {
     public class Create
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Activity Activity { get; set; }
         }
@@ -22,7 +23,7 @@ namespace Application.Activities
             }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly ApplicationDbContext _dbContext;
             public Handler(ApplicationDbContext dbContext)
@@ -30,13 +31,15 @@ namespace Application.Activities
                 _dbContext = dbContext;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 _dbContext.Activities.Add(request.Activity);
 
-                await _dbContext.SaveChangesAsync();
+                var result = await _dbContext.SaveChangesAsync() > 0;
 
-                return Unit.Value;
+                if(!result) return Result<Unit>.Failure("Failed to create activity");
+
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }
