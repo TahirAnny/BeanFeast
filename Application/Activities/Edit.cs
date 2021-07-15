@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core.Mappings;
 using AutoMapper;
 using Domain;
 using FluentValidation;
@@ -10,7 +11,7 @@ namespace Application.Activities
 {
     public class Edit
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Activity Activity { get; set; }
         }
@@ -23,7 +24,7 @@ namespace Application.Activities
             }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly ApplicationDbContext _dbContext;
             private readonly IMapper _mapper;
@@ -33,15 +34,20 @@ namespace Application.Activities
                 _mapper = mapper;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var actvity = await _dbContext.Activities.FindAsync(request.Activity.Id);
 
+                if (actvity == null) return null;
+
                 _mapper.Map(request.Activity, actvity);
 
-                await _dbContext.SaveChangesAsync();
+                var result = await _dbContext.SaveChangesAsync() > 0;
 
-                return Unit.Value;
+                if (!result)
+                    return Result<Unit>.Failure("Failed to Update Activity!");
+
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }
